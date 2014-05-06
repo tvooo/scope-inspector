@@ -3,7 +3,7 @@
 module.exports =
 class ScopeInspectorView extends View
   @content: ->
-    @div class: 'scope-inspector overlay from-top', =>
+    @div class: 'scope-inspector tool-panel panel-right', =>
       @div "The ScopeInspector package is Alive! It's ALIVE!", class: "message"
 
   initialize: (serializeState) ->
@@ -21,4 +21,4 @@ class ScopeInspectorView extends View
     if @hasParent()
       @detach()
     else
-      atom.workspaceView.append(this)
+      atom.workspaceView.appendToRight(this)

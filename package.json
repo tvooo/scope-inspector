@@ -3,12 +3,17 @@
   "main": "./lib/scope-inspector",
   "version": "0.0.0",
   "description": "A short description of your package",
-  "activationEvents": ["scope-inspector:toggle"],
+  "activationEvents": [
+    "scope-inspector:toggle"
+  ],
   "repository": "https://github.com/atom/scope-inspector",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
   },
   "dependencies": {
+    "esprima": "^1.2.1",
+    "emissary": "^1.2.1",
+    "lodash": "^2.4.1"
   }
 }
