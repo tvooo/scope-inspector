@@ -5,4 +5,21 @@
 @import "ui-variables";
 
 .scope-inspector {
+  background: @tool-panel-background-color;
+  width: 300px;
+}
+
+.scope-view ul {
+
+  list-style: none;
+  font-family: Source Code Pro, Consolas, monospace;
+
+  li {
+    .argument {
+      float: right;
+
+      font-size: .8em;
+      opacity: .7;
+    }
+  }
 }

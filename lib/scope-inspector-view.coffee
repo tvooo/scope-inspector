@@ -1,16 +1,19 @@
-{View} = require 'atom'
+{$$, View} = require 'atom'
+ScopeView = require './scope-view-single'
+_ = require 'lodash'
 
 module.exports =
 class ScopeInspectorView extends View
-  @content: ->
+  @content: (scope) ->
     @div class: 'scope-inspector tool-panel panel-right', =>
-      @div "The ScopeInspector package is Alive! It's ALIVE!", class: "message"
+      @div outlet: 'panelWrapper', =>
+        @subview 'scopeView', new ScopeView(scope) if scope?
 
   initialize: (serializeState) ->
     atom.workspaceView.command "scope-inspector:toggle", => @toggle()
+    atom.workspaceView.appendToRight(this)
+    @subviews = []
 
-  # Returns an object that can be retrieved when package is activated
-  serialize: ->
 
   # Tear down any state and detach
   destroy: ->
@@ -22,3 +25,18 @@ class ScopeInspectorView extends View
       @detach()
     else
       atom.workspaceView.appendToRight(this)
+
+  renderScope: (scope) ->
+    console.debug "Rendering scope"
+
+    @panelWrapper.empty()
+    @subviews = []
+
+    allScopes = _.flatten(scope.functions, (thing) ->
+      return thing
+    )
+    allScopes.push scope
+
+    (@subviews.push(new ScopeView(scope)) for scope in allScopes)
+
+    @panelWrapper.append view for view in @subviews

@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "A short description of your package",
   "activationEvents": [
-    "scope-inspector:toggle"
+    
   ],
   "repository": "https://github.com/atom/scope-inspector",
   "license": "MIT",
