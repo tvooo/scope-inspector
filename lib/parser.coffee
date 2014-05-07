@@ -1,30 +1,37 @@
 esprima = require 'esprima'
 _ = require 'lodash'
 
-scope = (object) ->
-  varDeclarations = (value for own key, value of object when value.type == 'VariableDeclaration')
-  vars = _.flatten(for decl in varDeclarations
-    d for d in decl.declarations
-  )
+class Variable
+  constructor: (@node) ->
+    @type = @node.type
+    @name = @node.id.name
 
-  funs = (value for own key, value of object when value.type == 'FunctionDeclaration')
-  for fun in funs
-    fun.scope = scope(fun.body.body)
+class Scope
+  constructor: (object, @parentScope) ->
+    @parentScope ?= null
 
-  #console.log declarations
-  #console.log varDecls
-  return {
-    vars: vars
-    funs: funs
-  }
+    varDeclarations = (value for own key, value of object when value.type == 'VariableDeclaration')
 
+    @variables = _.flatten(for decl in varDeclarations
+      new Variable(d) for d in decl.declarations
+    )
+
+    @functions = (new Function(value, @) for own key, value of object when value.type == 'FunctionDeclaration')
+
+    @name = "GLOBAL" if not @parentScope?
+
+class Function extends Scope
+  constructor: (@node, @parentScope) ->
+    super(@node.body.body, @parentScope)
+    @type = @node.type
+    @name = @node.id.name
+
+getNestedScopes = (scope) ->
+  [scope].concat( if scope.parentScope? then getNestedScopes(scope.parentScope) else [] )
 
 module.exports =
-  getScopes: (text) ->
+  getScopeTree: (text) ->
     syntax = esprima.parse text
 
-    global = scope syntax.body
-    console.log (vars.id.name for vars in global.vars).join(', ')
-    console.log (vars.id.name for vars in global.funs[2].scope.vars).join(', ')
-    console.log global.funs[2].scope
-    "ende"
+    global = new Scope syntax.body
+  getNestedScopes: getNestedScopes
