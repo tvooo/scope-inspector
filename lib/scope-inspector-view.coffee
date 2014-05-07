@@ -26,17 +26,12 @@ class ScopeInspectorView extends View
     else
       atom.workspaceView.appendToRight(this)
 
-  renderScope: (scope) ->
+  renderScope: (scopes) ->
     console.debug "Rendering scope"
 
     @panelWrapper.empty()
     @subviews = []
 
-    allScopes = _.flatten(scope.functions, (thing) ->
-      return thing
-    )
-    allScopes.push scope
-
-    (@subviews.push(new ScopeView(scope)) for scope in allScopes)
+    (@subviews.push(new ScopeView(scope)) for scope in scopes)
 
     @panelWrapper.append view for view in @subviews
