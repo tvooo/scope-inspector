@@ -23,11 +23,21 @@
       opacity: .7;
     }
   }
+
+  .is-shadowing {
+    color: @text-color-info;
+  }
+
+  .is-shadowed {
+    color: @text-color-subtle !important;
+    text-decoration: line-through;
+  }
 }
 
 .scope-highlight {
   position: absolute;
-  background: #333;
+  //background: #333;
+  background: @background-color-highlight;
 }
 
 .scope-path {

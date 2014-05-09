@@ -7,14 +7,23 @@ class ScopeView extends View
       @div class: "panel-heading", scope.name
       @ul class: "panel-body padded", =>
         if scope.params?
-          for param in scope.params
-            @li param.name, =>
-              @span class: 'argument', "param"
-        for variable in scope.variables
-          @li variable.name
-        for func in scope.functions
-          @li func.name, =>
-            @span class: 'argument', "()"
+          for id in scope.params
+            #console.log param
+            @li class: "#{'is-shadowing' if id.shadows} #{'is-shadowed' if id.shadowedBy.length}", id.name, =>
+              if id.shadowedBy.length
+                @span class: 'argument', "shadowed"
+              else
+                @span class: 'argument', "param"
+        for id in scope.variables
+          @li class: "#{'is-shadowing' if id.shadows} #{'is-shadowed' if id.shadowedBy.length}", id.name, =>
+            if id.shadowedBy.length
+              @span class: 'argument', "shadowed"
+        for id in scope.functions
+          @li class: "#{'is-shadowing' if id.shadows} #{'is-shadowed' if id.shadowedBy.length}", id.name, =>
+            if id.shadowedBy.length
+              @span class: 'argument', "shadowed"
+            else
+              @span class: 'argument', "()"
 
   destroy: ->
     @detach()
