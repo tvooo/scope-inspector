@@ -6,6 +6,11 @@
 #    });
 #  } );
 # });
+#
+# Auch das nicht:
+# ret[l] = _.sortBy(ret[l], function (el) {
+#  return el.character;
+#});
 
 esprima = require 'esprima'
 _ = require 'lodash'
@@ -35,6 +40,7 @@ class Variable
     @type = @node.type
     @name = @node.id.name
     @shadowedBy = []
+    @hoisted = false
 
 class Parameter
   constructor: (@node, @parentScope) ->
@@ -52,28 +58,47 @@ class Scope
     @variables = []
     @functions = []
 
-    # Getting all variables
+    # Going through all the statements
+    hoisting = false
 
-    varDeclarations = (value for value in body when value.type == 'VariableDeclaration')
-    for declaration in varDeclarations
-      for declarator in declaration.declarations
-        variable = new Variable(declarator, @)
+    for statement in body
 
-        if variable.node.init?.type == "FunctionExpression"
-          @functions.push new Funktion(variable.node.init, @, variable)
-        else
-          @variables.push variable
+      # All the variables
+
+      if statement.type == 'VariableDeclaration'
+        for declarator in statement.declarations
+          variable = new Variable(declarator, @)
+          variable.hoisted = hoisting
+          #console.log "#{variable.name} will be hoisted :)" if hoisting
+          if variable.node.init?.type == "FunctionExpression"
+            @functions.push new Funktion(variable.node.init, @, variable)
+          else
+            @variables.push variable
+      else
+        hoisting = true
+
+      # All the function declarations
+
+      if statement.type == 'FunctionDeclaration'
+        @functions.push new Funktion(statement, @)
+
+      # All the function expressions
+
+      else if statement.type == 'ExpressionStatement'
+        if statement.expression.type == 'CallExpression'
+          call = statement.expression
+          for argument in call.arguments when argument.type == 'FunctionExpression'
+            @functions.push new Funktion(argument, @)
+
+    #varDeclarations = (value for value in body when value.type == 'VariableDeclaration')
 
     # Getting all functions
-    @functions.push(new Funktion(value, @)) for value in body when value.type == 'FunctionDeclaration'
+    #@functions.push(new Funktion(value, @)) for value in body when value.type == 'FunctionDeclaration'
 
     # Getting all function expressions
-    expressionStatements = (statement for statement in body when statement.type == 'ExpressionStatement')
-    for statement in expressionStatements
-      if statement.expression.type == 'CallExpression'
-        call = statement.expression
-        for argument in call.arguments when argument.type == 'FunctionExpression'
-          @functions.push new Funktion(argument, @)
+    #expressionStatements = (statement for statement in body when statement.type == 'ExpressionStatement')
+    #for statement in expressionStatements
+
 
     @name = "GLOBAL" if not @parentScope?
 
@@ -99,6 +124,9 @@ class Scope
     for id in @functions
       id.constructShadowingInformation()
     @checkForShadowing()
+
+  getHoistedIdentifiers: ->
+    (id for id in @variables when id.hoisted)
 
 class Funktion extends Scope
   constructor: (@node, @parentScope, @identifier) ->
