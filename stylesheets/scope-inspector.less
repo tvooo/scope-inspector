@@ -7,6 +7,7 @@
 .scope-inspector {
   background: @tool-panel-background-color;
   width: 300px;
+  overflow: auto;
 }
 
 .scope-view ul {
@@ -21,5 +22,19 @@
       font-size: .8em;
       opacity: .7;
     }
+  }
+}
+
+.scope-highlight {
+  position: absolute;
+  background: #333;
+}
+
+.scope-path {
+  .scope-options {
+    float: right;
+  }
+  .scope-path-buttons {
+    //float: left;
   }
 }

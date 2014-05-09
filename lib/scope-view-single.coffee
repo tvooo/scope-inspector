@@ -11,8 +11,7 @@ class ScopeView extends View
             @li param.name, =>
               @span class: 'argument', "param"
         for variable in scope.variables
-          @li variable.name, =>
-            @span class: 'argument', "arg"
+          @li variable.name
         for func in scope.functions
           @li func.name, =>
             @span class: 'argument', "()"

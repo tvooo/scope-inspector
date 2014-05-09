@@ -1,85 +1,65 @@
-ScopeInspectorView = require './scope-inspector-view'
-ScopePathView = require './scope-path-view'
-parser = require './parser'
-
-{Range} = require 'atom'
-
 _ = require 'lodash'
 Subscriber = require('emissary').Subscriber
-
+Inspection = require './inspection'
+ScopeInspectorView = require './scope-inspector-view'
+ScopePathView = require './scope-path-view'
 plugin = module.exports
 
 Subscriber.extend plugin
 
-lint = ->
-  editor = atom.workspace.getActiveEditor();
-  editorView = atom.workspaceView.getActiveView();
+# Strategy
+#
+# - Attach one Inspection instance to each .js editor, saving the state, parse tree and managing views and events
+# - one InspectorView and one PathView in total
+# - For each scope, a marker is set from beginning to end of scope
+# - For each marker, a view is created, but not rendered
+# - This view renders if scope is in focus. if there are no child scopes, it's easy, otherwise it's more tricky. but manage it via markers!
+# - Inspection events
+#   * buffer-changed: update parse tree; new parse tree fires event to update views
+#   * cursor-changed: check if scope changed; if yes, update scope path, fire event to update views
+#   * active editor changes: if JS, show InspectorView and PathView, and update it
+# Options for:
+# - Highlight is exclusive/inclusive
+# - Highlight parents in different shades
+# - Disable highlight for GLOBAL
+# - Show sidebar (pathbar is always shown?)
+# - Turn off syntax highlighting, turn on scope highlighting
 
-  if (!editor)
-    return
+plugin.inspections = []
+plugin.activeInspection = null
 
-  if (editor.getGrammar().name != 'JavaScript')
-    return
-
-  js = editor.getText()
-
-  @scopeTree = parser.getScopeTree( js )
-
-  scopePath = parser.getNestedScopes( @scopeTree.functions[0] )
-
-  @scopeInspectorView ?= new ScopeInspectorView( @scopeTree )
-  @scopePathView ?= new ScopePathView( @scopePath )
-
-  @scopeInspectorView?.renderScope( scopePath )
-  @scopePathView?.renderScope( scopePath )
-
-isInScope = (cursor, scope) ->
-  cursorPos = cursor.getBufferPosition()
-  loc = scope.loc
-  range = new Range(
-    [loc.start.line-1, loc.start.column],
-    [loc.end.line-1, loc.end.column]
-  )
-  return range.containsPoint(cursorPos)
-
-getContainingScope = ( cursor, scope ) =>
-  for func in scope.functions
-    return getContainingScope(cursor, func) if isInScope( cursor, func)
-
-  return scope
-
-cursorChanged = ->
-  editor = atom.workspace.getActiveEditor();
-  if (!editor)
-    return
-
-  if (editor.getGrammar().name != 'JavaScript')
-    return
-  cursor = editor.getCursor()
-
-  scope = getContainingScope( cursor, @scopeTree )
-  scopePath = parser.getNestedScopes( scope )
-
-  @scopeInspectorView?.renderScope( scopePath )
-  @scopePathView?.renderScope( scopePath )
-
-  console.log "Cursor is in #{scope.name}"
-
-registerEvents = ->
-  console.log "Registering ALL the events!"
-  atom.workspace.eachEditor (editor) =>
-    buffer = editor.getBuffer();
-    plugin.subscribe(buffer, 'saved', _.debounce(lint.bind(this), 50));
-
+plugin.registerInspections = ->
   atom.workspaceView.eachEditorView (editorView) =>
-    plugin.subscribe(editorView, 'cursor:moved', _.debounce(cursorChanged.bind(this), 50));
+    editor = editorView.getEditor();
+    if editor.getGrammar().name isnt 'JavaScript'
+      return
 
+    inspection = new Inspection(editorView, @)
+    @inspections.push inspection
+    editor.inspection = inspection
 
-plugin.scopeInspectorView = null
+plugin.configDefaults =
+  highlightGlobal: false
+  highlightParents: false
+  exclusiveHighlight: false
+  showSidebar: true
+  scopeHighlighting: false
 
 plugin.activate = (state) ->
-  @scopeInspectorView ?= new ScopeInspectorView()
-  registerEvents.call(this)
+  @scopeInspectorView ?= new ScopeInspectorView(@)
+  @scopePathView ?= new ScopePathView(@)
+  atom.workspaceView.on('pane-container:active-pane-item-changed', @onPaneChanged.bind(this))
+  @registerInspections.call(this)
+
+plugin.onPaneChanged = ->
+  editor = atom.workspace.getActiveEditor()
+  if editor.getGrammar().name isnt 'JavaScript'
+    # disable the shit out of the plugin
+  else
+    @activeInspection = editor.inspection
 
 plugin.deactivate = ->
-    @scopeInspectorView.destroy()
+  inspection.destroy() for inspection in @inspections
+
+plugin.serialize = ->
+  JSON.stringify(@state)

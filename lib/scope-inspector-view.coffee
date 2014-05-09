@@ -1,15 +1,15 @@
-{$$, View} = require 'atom'
+{$$, View, ScrollView} = require 'atom'
 ScopeView = require './scope-view-single'
 _ = require 'lodash'
 
 module.exports =
-class ScopeInspectorView extends View
-  @content: (scope) ->
+class ScopeInspectorView extends ScrollView
+  @content: ->
     @div class: 'scope-inspector tool-panel panel-right', =>
-      @div outlet: 'panelWrapper', =>
-        @subview 'scopeView', new ScopeView(scope) if scope?
+      @div outlet: 'panelWrapper'
 
-  initialize: (serializeState) ->
+  initialize: (@plugin) ->
+    super()
     atom.workspaceView.command "scope-inspector:toggle", => @toggle()
     atom.workspaceView.appendToRight(this)
     @subviews = []
