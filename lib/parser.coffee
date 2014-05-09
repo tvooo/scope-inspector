@@ -10,15 +10,18 @@
 esprima = require 'esprima'
 _ = require 'lodash'
 
-class Variable
-  constructor: (@node, @parentScope) ->
-    @type = @node.type
-    @name = @node.id.name
-    @shadowedBy = []
+extend = (obj, mixin) ->
+  obj[name] = method for name, method of mixin
+  obj
 
+include = (klass, mixin) ->
+  extend klass.prototype, mixin
+
+Identifier =
   getShadowedIdentifier: ->
     scope = @parentScope.parentScope
-    while scope isnt null
+
+    while scope?
       id = scope.getIdentifier(@name)
       if id isnt null
         id.shadowedBy.push @
@@ -27,23 +30,19 @@ class Variable
         scope = scope.parentScope
     null
 
+class Variable
+  constructor: (@node, @parentScope) ->
+    @type = @node.type
+    @name = @node.id.name
+    @shadowedBy = []
 
 class Parameter
   constructor: (@node, @parentScope) ->
     @name = @node.name
     @shadowedBy = []
 
-  getShadowedIdentifier: ->
-    scope = @parentScope.parentScope?
-    return null unless scope.parentScope?.parentScope? isnt null
-    while scope isnt null
-      id = scope.getIdentifier(@name)
-      #console.log @name, id
-      if id then return id else scope = scope.parentScope
-    null
-
 class Scope
-  constructor: (@node, @parentScope) ->
+  constructor: (@node, @parentScope = null) ->
     @parentScope ?= null
     body = if @parentScope? then @node.body.body else @node.body
     @loc = @node.loc
@@ -61,12 +60,12 @@ class Scope
         variable = new Variable(declarator, @)
 
         if variable.node.init?.type == "FunctionExpression"
-          @functions.push new Function(variable.node.init, @, variable)
+          @functions.push new Funktion(variable.node.init, @, variable)
         else
           @variables.push variable
 
     # Getting all functions
-    @functions.push(new Function(value, @)) for value in body when value.type == 'FunctionDeclaration'
+    @functions.push(new Funktion(value, @)) for value in body when value.type == 'FunctionDeclaration'
 
     # Getting all function expressions
     expressionStatements = (statement for statement in body when statement.type == 'ExpressionStatement')
@@ -74,52 +73,54 @@ class Scope
       if statement.expression.type == 'CallExpression'
         call = statement.expression
         for argument in call.arguments when argument.type == 'FunctionExpression'
-          @functions.push new Function(argument, @)
+          @functions.push new Funktion(argument, @)
 
     @name = "GLOBAL" if not @parentScope?
 
     # Registering children
     @children.push @variables
-    #@children.push @functions
+    @children.push @functions
 
-    @checkForShadowing() if @.constructor == Scope
-
+  # Returns a child identifier from this scope
   getIdentifier: (name) ->
-    _.find(@variables, { 'name': name }) ||
-      _.find(@functions, { 'name': name }) ||
-      _.find(@params, { 'name': name }) ||
-      null
+    for child in @children
+      id = _.find(child, { 'name': name })
+      #if id.type == "FunctionExpression" and id.isAnonymous
+      if id and not id.isAnonymous
+        return id
+    return null
 
   checkForShadowing: ->
     for child in @children
       for id in child
         id.shadows = id.getShadowedIdentifier()
 
-class Function extends Scope
+  constructShadowingInformation: ->
+    for id in @functions
+      id.constructShadowingInformation()
+    @checkForShadowing()
+
+class Funktion extends Scope
   constructor: (@node, @parentScope, @identifier) ->
-    super(@node, @parentScope)
     @type = @node.type
     @shadowedBy = []
+    @isAnonymous = false
     if @node.id?
       @name = @node.id.name
-    else if @identifier
+    else if @identifier?
       @name = @identifier.name
     else
+      @isAnonymous = true
       @name = "(anonymous function)"
+
+    super(@node, @parentScope)
     @params = (new Parameter(param, @) for param in @node.params)
 
-    #@children.push @params
+    @children.push @params
 
-    @checkForShadowing() if @.constructor == Function
-
-  getShadowedIdentifier: ->
-    scope = @parentScope.parentScope?
-    return null unless scope.parentScope?.parentScope? isnt null
-    while scope isnt null
-      id = scope.getIdentifier(@name)
-      #console.log @name, id
-      if id then return id else scope = scope.parentScope
-    null
+include Variable, Identifier
+include Parameter, Identifier
+include Funktion, Identifier
 
 getNestedScopes = (scope) ->
   [scope].concat( if scope.parentScope? then getNestedScopes(scope.parentScope) else [] )
@@ -129,4 +130,6 @@ module.exports =
     syntax = esprima.parse text, range: true, loc: true
 
     global = new Scope syntax
+    global.constructShadowingInformation()
+    return global
   getNestedScopes: getNestedScopes

@@ -8,7 +8,6 @@ class ScopeView extends View
       @ul class: "panel-body padded", =>
         if scope.params?
           for id in scope.params
-            #console.log param
             @li class: "#{'is-shadowing' if id.shadows} #{'is-shadowed' if id.shadowedBy.length}", id.name, =>
               if id.shadowedBy.length
                 @span class: 'argument', "shadowed"
