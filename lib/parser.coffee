@@ -60,8 +60,13 @@ class Scope
 
     # Going through all the statements
     hoisting = false
+    @hoistingPosition = null
 
-    for statement in body
+    for statement, index in body
+
+      # Set hoistingPosition for first statement
+      if 0 == index
+        @hoistingPosition = statement.loc
 
       # All the variables
 

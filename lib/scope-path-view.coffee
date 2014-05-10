@@ -7,8 +7,11 @@ class ScopePathView extends View
       @div class: 'inset-panel padded', =>
         @div class: 'btn-group scope-path-buttons', outlet: 'panelWrapper'
         @div class: 'btn-group scope-options', =>
-          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.highlightGlobal'}", click: 'toggleHighlightGlobal','Highlight Global'
-          @button class: 'btn', 'Show Sidebar'
+          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.highlightGlobalScope'}", click: 'toggleHighlightGlobal','Highlight Global'
+          @button class: 'btn icon icon-list-unordered', outline: 'btnToggleSidebar', =>
+            console.log @
+            #console.log @btnToggleSidebar
+            #@btnToggleSidebar.setTooltip(title
 
 
   initialize: (@plugin) ->
@@ -28,7 +31,7 @@ class ScopePathView extends View
 
   toggleHighlightGlobal: (event, element) ->
     element.toggleClass('selected')
-    atom.config.set 'scope-inspector.highlightGlobal', element.is('.selected')
+    atom.config.set 'scope-inspector.highlightGlobalScope', element.is('.selected')
 
   onClickButton: (scope, event) ->
     #@plugin.

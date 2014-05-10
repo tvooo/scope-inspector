@@ -39,11 +39,11 @@ plugin.registerInspections = ->
     editor.inspection = inspection
 
 plugin.configDefaults =
-  highlightGlobal: false
-  highlightParents: false
-  exclusiveHighlight: false
+  highlightScopeInEditor: false
+  highlightGlobalScope: false
+  #highlightParents: false
+  #exclusiveHighlight: false
   showSidebar: true
-  scopeHighlighting: false
 
 plugin.activate = (state) ->
   @scopeInspectorView ?= new ScopeInspectorView(@)
@@ -53,10 +53,18 @@ plugin.activate = (state) ->
 
 plugin.onPaneChanged = ->
   editor = atom.workspace.getActiveEditor()
+  if not editor
+    @scopeInspectorView.hide()
+    @scopePathView.hide()
+    return
   if editor.getGrammar().name isnt 'JavaScript'
     # disable the shit out of the plugin
+    @scopeInspectorView.hide()
+    @scopePathView.hide()
   else
     @activeInspection = editor.inspection
+    @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'
+    @scopePathView.show()
 
 plugin.deactivate = ->
   inspection.destroy() for inspection in @inspections

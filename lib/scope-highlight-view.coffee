@@ -12,11 +12,11 @@ class ScopeHighlightView extends View
   destroy: ->
     @detach()
 
-  rerender: (scope) ->
-    console.log "Rendering the shit out of this thingie"
+  render: (scope) ->
+    console.log "Rendering ScopeHighlightView"
     @editorView.find('.underlayer .scope-highlight').fadeOut @fadeSpeed, -> @.remove()
 
-    return unless scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobal'
+    return unless scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobalScope'
 
     backgrounds = []
 
@@ -38,7 +38,7 @@ class ScopeHighlightView extends View
     background = $('<div class="scope-highlight"/>')
     background.css({top: startPosition.top, left: startPosition.left});
     # Calculating end of line
-    line = @editorView.find(".lines .line").eq(scope.loc.start.line-1).find('span.source')
+    line = @editorView.lineElementForScreenRow(scope.loc.start.line-1).find('span.source')
     background.width(line.width() - startPosition.left)
     background.height(height)
     background.hide()

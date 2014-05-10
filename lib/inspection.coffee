@@ -1,4 +1,5 @@
 ScopeHighlightView = require './scope-highlight-view'
+HoistingView = require './hoisting-view'
 parser = require './parser'
 {Range} = require 'atom'
 _ = require 'lodash'
@@ -38,15 +39,18 @@ class Inspection
 
   onCursorMoved: ->
     cursor = @editor.getCursor()
-
     scope = getContainingScope( cursor, @scopeTree )
     return unless scope != @scope
+
+    @hoistingView?.destroy()
     @scope = scope
     scopePath = parser.getNestedScopes( @scope )
 
     @plugin.scopeInspectorView?.renderScope( scopePath )
     @plugin.scopePathView?.renderScope( scopePath )
-    @scopeHighlightView.rerender( scope )
+    @scopeHighlightView.render( scope )
+    @hoistingView = new HoistingView( @ )
+    @hoistingView.render( scope )
 
     console.log "Cursor is in #{scope.name}"
 
