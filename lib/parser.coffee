@@ -1,17 +1,3 @@
-# to do: erkennt erste anonyme func noch nicht
-# var server = http.createServer( function( req, res ) {
-#  parseMarkdown( function( err, data ) {
-#    compileHtml( data, function( err, data ) {
-#      res.end( data );
-#    });
-#  } );
-# });
-#
-# Auch das nicht:
-# ret[l] = _.sortBy(ret[l], function (el) {
-#  return el.character;
-#});
-
 esprima = require 'esprima'
 _ = require 'lodash'
 
@@ -59,62 +45,65 @@ class Scope
     @functions = []
 
     # Going through all the statements
-    hoisting = false
+    @hoisting = false
     @hoistingPosition = null
 
     for statement, index in body
-
       # Set hoistingPosition for first statement
-      if 0 == index
-        @hoistingPosition = statement.loc
-
-      # All the variables
-
-      if statement.type == 'VariableDeclaration'
-        for declarator in statement.declarations
-          variable = new Variable(declarator, @)
-          variable.hoisted = hoisting
-          #console.log "#{variable.name} will be hoisted :)" if hoisting
-          if variable.node.init?.type == "FunctionExpression"
-            @functions.push new Funktion(variable.node.init, @, variable)
-          else if variable.node.init?.type == "CallExpression"
-            call = variable.node.init
-            for argument in call.arguments when argument.type == 'FunctionExpression'
-              @functions.push new Funktion(argument, @)
-          else
-            @variables.push variable
-      else
-        hoisting = true
-
-      # All the function declarations
-
-      if statement.type == 'FunctionDeclaration'
-        @functions.push new Funktion(statement, @)
-
-      # All the function expressions
-
-      else if statement.type == 'ExpressionStatement'
-        #console.log statement
-        if statement.expression.type == 'CallExpression'
-          call = statement.expression
-          for argument in call.arguments when argument.type == 'FunctionExpression'
-            @functions.push new Funktion(argument, @)
-
-    #varDeclarations = (value for value in body when value.type == 'VariableDeclaration')
-
-    # Getting all functions
-    #@functions.push(new Funktion(value, @)) for value in body when value.type == 'FunctionDeclaration'
-
-    # Getting all function expressions
-    #expressionStatements = (statement for statement in body when statement.type == 'ExpressionStatement')
-    #for statement in expressionStatements
-
+      @hoistingPosition = statement.loc if 0 == index
+      @parseNode statement
 
     @name = "GLOBAL" if not @parentScope?
 
     # Registering children
     @children.push @variables
     @children.push @functions
+
+  parseNode: (node, identifier) ->
+
+    if node.type isnt "VariableDeclaration"
+      @hoisting = true
+
+    switch node.type
+
+      when "ExpressionStatement"
+        @parseNode(node.expression)
+
+      # *Expressions
+      when "FunctionExpression"
+        @functions.push new Funktion(node, @, identifier)
+
+      when "CallExpression"
+        @parseNode node.callee
+        @parseNode(argument) for argument in node.arguments
+
+      when "MemberExpression"
+        @parseNode node.object
+        @parseNode node.property
+
+      when "AssignmentExpression"
+        @parseNode node.left
+        @parseNode node.right
+
+      # *Declarations
+      when "VariableDeclaration"
+        for declarator in node.declarations
+          variable = new Variable(declarator, @)
+          variable.hoisted = @hoisting
+          if variable.node.init
+            @parseNode(variable.node.init, identifier)
+          @variables.push variable
+
+      when "FunctionDeclaration"
+        @functions.push new Funktion(node, @)
+
+      when "Identifier"
+        # Do nothing
+        return
+
+      when "EmptyStatement"
+        # Do nothing
+        return
 
   # Returns a child identifier from this scope
   getIdentifier: (name) ->
