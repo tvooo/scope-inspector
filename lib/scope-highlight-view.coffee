@@ -1,66 +1,62 @@
 {$, View} = require 'atom'
 
 module.exports =
-class ScopeHighlightView extends View
-  constructor: (@editorView, @plugin) ->
+class HighlightView extends View
+  constructor: (@editorView, @marker) ->
     super()
     @fadeSpeed = 150
+    @fadeFastSpeed = 80
 
   @content: (editorView) ->
     @div ->
 
   destroy: ->
+    @remove()
     @detach()
 
   render: (scope) ->
-    console.log "Rendering ScopeHighlightView"
-    @editorView.find('.underlayer .scope-highlight').fadeOut @fadeSpeed, -> @.remove()
+    @empty().hide()
 
-    return unless scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobalScope'
+    startPosition = @editorView.pixelPositionForBufferPosition @marker.getStartPosition()
+    endPosition = @editorView.pixelPositionForBufferPosition @marker.getEndPosition()
+    lineHeight = @editorView.lineHeight
 
-    backgrounds = []
-
-    startPosition = @editorView.pixelPositionForBufferPosition([scope.loc.start.line-1, scope.loc.start.column])
-    endPosition = @editorView.pixelPositionForBufferPosition([scope.loc.end.line-1, scope.loc.end.column])
-
-    if scope.loc.start.line == scope.loc.end.line
+    if @marker.getRange().isSingleLine()
       background = $('<div class="scope-highlight"/>')
       background.css({top: startPosition.top, left: startPosition.left});
       background.width(endPosition.left - startPosition.left)
-      height = @editorView.lineHeight
-      background.height(height)
-      background.hide()
-      @editorView.find('.underlayer').append(background)
-      return
-
-    height = @editorView.lineHeight
-    # First line
-    background = $('<div class="scope-highlight"/>')
-    background.css({top: startPosition.top, left: startPosition.left});
-    # Calculating end of line
-    line = @editorView.lineElementForScreenRow(scope.loc.start.line-1).find('span.source')
-    background.width(line.width() - startPosition.left)
-    background.height(height)
-    background.hide()
-    backgrounds.push background
-
-    # Last line
-    background = $('<div class="scope-highlight"/>')
-    background.css({top: endPosition.top, left: 0});
-    background.width(endPosition.left)
-    background.height(height)
-    background.hide()
-    backgrounds.push background
-
-    # If it spans more than 2 lines...
-    if (scope.loc.end.line - scope.loc.start.line) > 1
+      background.height lineHeight
+      @append background
+    else
+      # First line
       background = $('<div class="scope-highlight"/>')
-      background.css({top: startPosition.top + height, left: 0});
-      background.width('100%')
-      background.height(endPosition.top - startPosition.top - height)
-      background.hide()
-      backgrounds.push background
+      background.css({top: startPosition.top, left: startPosition.left});
+      background.css('right': '0')
+      background.height(lineHeight)
+      @append background
 
-    for background in backgrounds
-      @editorView.find('.underlayer').append(background)
-      background.fadeIn(@fadeSpeed)
+      # Last line
+      background = $('<div class="scope-highlight"/>')
+      background.css({top: endPosition.top, left: 0});
+      background.width(endPosition.left)
+      background.height(lineHeight)
+      @append background
+
+      # If it spans more than 2 lines...
+      if @marker.getRange().getRows().length > 1
+        background = $('<div class="scope-highlight"/>')
+        background.css({top: startPosition.top + lineHeight, left: 0});
+        background.width('100%')
+        background.height(endPosition.top - startPosition.top - lineHeight)
+        @append background
+
+    @appendTo @editorView.find('.underlayer')
+
+  showHighlight: ->
+    @fadeIn @fadeSpeed
+  showHighlightImmediately: ->
+    @show()
+  hideHighlight: ->
+    @fadeOut @fadeSpeed
+  hideHighlightImmediately: ->
+    @hide()

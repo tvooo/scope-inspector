@@ -61,6 +61,8 @@ class Scope
 
   parseNode: (node, identifier) ->
 
+    return unless node?
+
     if node.type isnt "VariableDeclaration"
       @hoisting = true
 
@@ -97,11 +99,41 @@ class Scope
       when "FunctionDeclaration"
         @functions.push new Funktion(node, @)
 
+      when "IfStatement"
+        @parseNode node.test
+        @parseNode node.consequent
+        @parseNode node.alternate
+
+      when "WhileStatement"
+        @parseNode node.test
+        @parseNode node.body
+
+      when "ForStatement"
+        @parseNode node.init
+        @parseNode node.test
+        @parseNode node.update
+        @parseNode node.body
+
+      when "SwitchStatement"
+        @parseNode node.discriminant
+        @parseNode(statement) for statement in node.cases
+
+      when "SwitchCase"
+        @parseNode node.test
+        @parseNode node.consequent
+
+      when "BlockStatement"
+        @parseNode(statement) for statement in node.body
+
       when "Identifier"
         # Do nothing
         return
 
       when "EmptyStatement"
+        # Do nothing
+        return
+
+      when "Literal"
         # Do nothing
         return
 
@@ -126,6 +158,13 @@ class Scope
 
   getHoistedIdentifiers: ->
     (id for id in @variables when id.hoisted)
+
+  getAllScopes: ->
+    result = [@]
+    for scope in @functions
+      result = result.concat scope.getAllScopes()
+
+    return result
 
 class Funktion extends Scope
   constructor: (@node, @parentScope, @identifier) ->
