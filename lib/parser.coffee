@@ -77,6 +77,10 @@ class Scope
           #console.log "#{variable.name} will be hoisted :)" if hoisting
           if variable.node.init?.type == "FunctionExpression"
             @functions.push new Funktion(variable.node.init, @, variable)
+          else if variable.node.init?.type == "CallExpression"
+            call = variable.node.init
+            for argument in call.arguments when argument.type == 'FunctionExpression'
+              @functions.push new Funktion(argument, @)
           else
             @variables.push variable
       else
@@ -90,6 +94,7 @@ class Scope
       # All the function expressions
 
       else if statement.type == 'ExpressionStatement'
+        #console.log statement
         if statement.expression.type == 'CallExpression'
           call = statement.expression
           for argument in call.arguments when argument.type == 'FunctionExpression'
