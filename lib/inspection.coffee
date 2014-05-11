@@ -22,7 +22,6 @@ getContainingScope = ( cursor, scope ) =>
 module.exports =
 class Inspection
   constructor: (@editorView, @plugin) ->
-    console.log "Initializing Inspection"
     @editor = @editorView.getEditor()
     @markers = []
     @registerEvents()
@@ -37,7 +36,6 @@ class Inspection
     @editor.inspection = null
 
   registerEvents: ->
-    console.log "Registering ALL the events!"
     @editor.buffer.on('saved', _.debounce(@onSaved.bind(this), 50));
     @editorView.on('cursor:moved', _.debounce(@onCursorMoved.bind(this), 50));
 
@@ -67,10 +65,8 @@ class Inspection
       @markers.push marker
 
   onCursorMoved: ->
-    console.log "onCursorMoved"
     cursor = @editor.getCursor()
     scope = if @scopeTree? then getContainingScope( cursor, @scopeTree ) else null
-    console.log scope
     return unless scope != @scope
 
     @hoistingView?.destroy()
@@ -111,7 +107,6 @@ class Inspection
       @scopeTree = parser.getScopeTree( js )
     catch err
       @scopeTree = null
-      console.error "Nopenopenope"
 
     @updateMarkers()
 

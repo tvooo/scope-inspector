@@ -27,7 +27,6 @@ module.exports =
 
     @send: (params) ->
       return unless atom.config.get 'scope-inspector.trackUsageMetrics'
-      console.debug "Sending analytics event"
       _.extend(params, @defaultParams())
       @request
         method: 'POST'

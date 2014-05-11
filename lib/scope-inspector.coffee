@@ -31,7 +31,6 @@ class ScopeInspector
     @activeInspection = null
 
   registerInspections: ->
-    console.debug "Registering Inspections"
     atom.workspaceView.eachEditorView (editorView) =>
 
       editor = editorView.getEditor();
@@ -54,7 +53,6 @@ class ScopeInspector
     userId: ""
 
   activate: (@state) ->
-    #console.log "Deserializing state ", @state
     @scopeInspectorView ?= new ScopeInspectorView(@)
     @scopePathView ?= new ScopePathView(@)
     @scopePathView.registerAdditionalEvents()

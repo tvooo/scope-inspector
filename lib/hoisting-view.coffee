@@ -23,7 +23,6 @@ class HostingView extends View
     @area.addClass("violation-#{@violation.severity}")
 
   render: (scope) ->
-    console.log "Rendering HoistingView"
     @editorView.find('.underlayer .hoisting').hide().remove()
     hoistedIdentifiers = scope.getHoistedIdentifiers()
     return unless hoistedIdentifiers.length

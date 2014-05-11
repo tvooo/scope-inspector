@@ -20,7 +20,6 @@ class ScopePathView extends View
       @btnToggleSidebar[if atom.config.get 'scope-inspector.showSidebar' then 'addClass' else 'removeClass']('selected')
     atom.config.observe 'scope-inspector.highlightGlobalScope', =>
       @btnToggleHighlightGlobal[if atom.config.get 'scope-inspector.highlightGlobalScope' then 'addClass' else 'removeClass']('selected')
-    console.log atom.config
 
   # Tear down any state and detach
   destroy: ->

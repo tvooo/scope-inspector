@@ -26,7 +26,6 @@ class ScopeInspectorView extends ScrollView
     atom.config.toggle 'scope-inspector.showSidebar'
 
   onToggle: ->
-    console.log "Sidebar was toggled!"
     if atom.config.get('scope-inspector.showSidebar') and not @hasParent()
       atom.workspaceView.appendToRight @
       @plugin.onPaneChanged()
