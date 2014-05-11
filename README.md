@@ -2,7 +2,7 @@
 
 View your JavaScript code from a different perspective. Explore nested scopes and detect variable shadowing and hoisting.
 
-![Scope Inspector](scope-inspector.gif)
+![Scope Inspector](https://raw.githubusercontent.com/tvooo/scope-inspector/master/scope-inspector.gif)
 
 ## This is heavy work-in-progress stuff
 
@@ -37,9 +37,9 @@ Here's what is going to be tracked:
 ### Inline
 
 - Highlight current scope
-  ![Highlight current scope](scope-highlight.png)
+  ![Highlight current scope](https://raw.githubusercontent.com/tvooo/scope-inspector/master/scope-highlight.png)
 - Indicate hoisted variables
-  ![Indicate hoisted variables](hoisting.png)
+  ![Indicate hoisted variables](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisting.png)
 
 ### Scope Inspector (bottom bar)
 
@@ -49,12 +49,12 @@ Here's what is going to be tracked:
 
 ### Sidebar
 
-![Sidebar](sidebar.png)
+![Sidebar](https://raw.githubusercontent.com/tvooo/scope-inspector/master/sidebar.png)
 
 - List parameters, variables and nested functions of the current and all surrounding scopes (closest is on top, furthest [global scope] on the bottom)
 - Indicate if an identifier will be hoisted  
-  ![Hosting indicator](hoisted.png)
+  ![Hosting indicator](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisted.png)
 - Indicate if an identifier shadows another identifier (with the same name, in a surrounding scope)  
-  ![Shadowing](shadowing.png)
+  ![Shadowing](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowing.png)
 - Indicate if an identifier is shadowed  
-  ![Shadowed](shadowed.png)
+  ![Shadowed](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowed.png)
