@@ -9,7 +9,7 @@
     'submenu': [
       'label': 'scope-inspector'
       'submenu': [
-        { 'label': 'Toggle', 'command': 'scope-inspector:toggle' }
+        { 'label': 'Toggle Sidebar', 'command': 'scope-inspector:toggle' }
       ]
     ]
   }

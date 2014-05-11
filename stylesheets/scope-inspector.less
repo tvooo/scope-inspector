@@ -4,6 +4,16 @@
   background: @tool-panel-background-color;
   width: 300px;
   overflow: auto;
+
+  .scope-inspector-resize-handle {
+    left: -5px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 10px;
+    cursor: col-resize;
+    z-index: 3;
+  }
 }
 
 .scope-view ul {
@@ -41,6 +51,9 @@
 }
 
 .scope-path {
+  .inset-panel {
+    overflow: auto;
+  }
   .scope-options {
     float: right;
   }

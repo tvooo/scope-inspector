@@ -39,10 +39,11 @@ class Inspection
       marker.highlightView.destroy()
       marker.destroy()
 
+    @markers = []
+
     return unless @scopeTree?
 
     allScopes = @scopeTree.getAllScopes()
-    @markers = []
 
     for scope in allScopes
       loc = scope.loc
@@ -62,20 +63,20 @@ class Inspection
 
   onCursorMoved: ->
     cursor = @editor.getCursor()
-    scope = getContainingScope( cursor, @scopeTree )
+    scope = if @scopeTree then getContainingScope( cursor, @scopeTree ) else null
     return unless scope != @scope
 
     @hoistingView?.destroy()
     @scope = scope
-    scopePath = parser.getNestedScopes( @scope )
+    scopePath = if @scope? then parser.getNestedScopes( @scope ) else null
 
     @plugin.scopeInspectorView?.renderScope( scopePath )
     @plugin.scopePathView?.renderScope( scopePath )
+    @updateHighlights()
+    
+    return unless scopePath?
     @hoistingView = new HoistingView( @ )
     @hoistingView.render( scope )
-    @updateHighlights()
-
-    console.log "Cursor is in #{scope.name}"
 
   focusScope: (scope) ->
     return unless scope != @scope
@@ -99,7 +100,12 @@ class Inspection
   onSaved: ->
     # Update scopeTree
     js = @editor.getText()
-    @scopeTree = parser.getScopeTree( js )
+    try
+      @scopeTree = parser.getScopeTree( js )
+    catch err
+      @scopeTree = null
+      console.error "Nopenopenope"
+
     @updateMarkers()
 
     @onCursorMoved()

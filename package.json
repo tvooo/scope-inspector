@@ -1,19 +1,18 @@
 {
   "name": "scope-inspector",
   "main": "./lib/scope-inspector",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Inspect and explore JavaScript scope.",
-  "activationEvents": [
-
-  ],
-  "repository": "https://github.com/atom/scope-inspector",
+  "activationEvents": [],
+  "repository": "https://github.com/tvooo/scope-inspector",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">0.90.0"
   },
   "dependencies": {
     "esprima": "^1.2.1",
     "emissary": "^1.2.1",
-    "lodash": "^2.4.1"
+    "lodash": "^2.4.1",
+    "getmac": "^1.0.6"
   }
 }

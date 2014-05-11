@@ -1,6 +1,5 @@
 _ = require 'lodash'
 {$, View, Range, Point} = require 'atom'
-#ViolationTooltip = require './violation-tooltip'
 
 module.exports =
 class HostingView extends View
@@ -12,15 +11,6 @@ class HostingView extends View
   initialize: (@inspection) ->
     @editorView = @inspection.editorView
     @editor = @editorView.getEditor()
-
-    #@initializeSubviews()
-    #@initializeStates()
-
-    #@prepareTooltip()
-    #@trackEdit()
-    #@trackCursor()
-    #@showHighlight()
-    #@toggleTooltipWithCursorPosition()
 
   destroy: ->
     @detach()
@@ -43,7 +33,6 @@ class HostingView extends View
 
     line = @editorView.lineElementForScreenRow(scope.hoistingPosition.start.line-1).find('span.source')
     @width(line.width() - startPosition.left + 5)
-    console.log "Line width: #{line.width()}"
     @height lineHeight
 
     @css
@@ -52,9 +41,6 @@ class HostingView extends View
 
     @setTooltip "Hoisted identifiers: " + _.pluck(hoistedIdentifiers, 'name').join(', ')
     @editorView.find('.overlayer').append(@)
-    console.log @
-
-
 
   trackEdit: ->
     # :persistent -
@@ -117,7 +103,5 @@ class HostingView extends View
     [event.oldTailScreenPosition, event.newTailScreenPosition].some (position) ->
       editorFirstVisibleRow <= position.row <= editorLastVisibleRow
 
-
   beforeRemove: ->
-    @marker?.destroy()
-    @tooltip('destroy')
+    #@marker?.destroy()

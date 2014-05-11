@@ -11,7 +11,7 @@ class HighlightView extends View
     @div ->
 
   destroy: ->
-    @remove()
+    #@remove()
     @detach()
 
   render: (scope) ->

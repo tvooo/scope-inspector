@@ -3,9 +3,8 @@ Subscriber = require('emissary').Subscriber
 Inspection = require './inspection'
 ScopeInspectorView = require './scope-inspector-view'
 ScopePathView = require './scope-path-view'
-plugin = module.exports
-
-Subscriber.extend plugin
+Reporter = require './reporter'
+crypto = require 'crypto'
 
 # Strategy
 #
@@ -25,12 +24,24 @@ Subscriber.extend plugin
 # - Show sidebar (pathbar is always shown?)
 # - Turn off syntax highlighting, turn on scope highlighting
 
-plugin.inspections = []
-plugin.activeInspection = null
+class ScopeInspector
+  Subscriber.extend @
 
-plugin.registerInspections = ->
-  atom.workspaceView.eachEditorView (editorView) =>
+  constructor: ->
+    @inspections = []
+    @activeInspection = null
+
+  registerInspections: ->
+    console.debug "Registering Inspections"
+    atom.workspaceView.eachEditorView (editorView) =>
+
+      editor = editorView.getEditor();
+      editorView.command('editor:grammar-changed', => @updateInspection(editorView))
+      @updateInspection(editorView)
+
+  updateInspection: (editorView) ->
     editor = editorView.getEditor();
+    #console.log editor.getGrammar().name
     if editor.getGrammar().name isnt 'JavaScript'
       return
 
@@ -38,36 +49,70 @@ plugin.registerInspections = ->
     @inspections.push inspection
     editor.inspection = inspection
 
-plugin.configDefaults =
-  highlightScopeInEditor: false
-  highlightGlobalScope: false
-  #highlightParents: false
-  #exclusiveHighlight: false
-  showSidebar: true
+  configDefaults:
+    highlightScopeInEditor: false
+    highlightGlobalScope: false
+    showSidebar: true
+    trackUsageMetrics: false
+    userId: null
 
-plugin.activate = (state) ->
-  @scopeInspectorView ?= new ScopeInspectorView(@)
-  @scopePathView ?= new ScopePathView(@)
-  atom.workspaceView.on('pane-container:active-pane-item-changed', @onPaneChanged.bind(this))
-  @registerInspections.call(this)
+  activate: (@state) ->
+    console.log "Deserializing state ", @state
+    @scopeInspectorView ?= new ScopeInspectorView(@)
+    @scopePathView ?= new ScopePathView(@)
+    @scopePathView.registerAdditionalEvents()
+    atom.workspaceView.on('pane-container:active-pane-item-changed', @onPaneChanged.bind(this))
+    @registerInspections.call(this)
+    @scopeInspectorView.onToggle()
+    if atom.config.get('scope-inspector.userId')
+      @begin(@state.sessionLength)
+    else
+      @getUserId (userId) -> atom.config.set('scope-inspector.userId', userId)
+      @begin(@state.sessionLength)
+    atom.config.observe 'scope-inspector.showSidebar', ->
+      Reporter.sendEvent('showSidebar', if atom.config.get 'scope-inspector.showSidebar' then 'enabled' else 'disabled')
+    atom.config.observe 'scope-inspector.highlightGlobalScope', ->
+      Reporter.sendEvent('highlightGlobalScope', if atom.config.get 'scope-inspector.highlightGlobalScope' then 'enabled' else 'disabled')
+    atom.config.observe 'scope-inspector.highlightScopeInEditor', ->
+      Reporter.sendEvent('highlightScopeInEditor', if atom.config.get 'scope-inspector.highlightScopeInEditor' then 'enabled' else 'disabled')
 
-plugin.onPaneChanged = ->
-  editor = atom.workspace.getActiveEditor()
-  if not editor
-    @scopeInspectorView.hide()
-    @scopePathView.hide()
-    return
-  if editor.getGrammar().name isnt 'JavaScript'
-    # disable the shit out of the plugin
-    @scopeInspectorView.hide()
-    @scopePathView.hide()
-  else
-    @activeInspection = editor.inspection
-    @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'
-    @scopePathView.show()
+  onPaneChanged: ->
+    editor = atom.workspace.getActiveEditor()
+    if not editor
+      @scopeInspectorView.hide()
+      @scopePathView.hide()
+      return
+    if editor.getGrammar().name isnt 'JavaScript'
+      @scopeInspectorView.hide()
+      @scopePathView.hide()
+    else
+      @activeInspection = editor.inspection
+      #@scopeInspectorView.onToggle()
+      @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'
+      @scopePathView.show()
 
-plugin.deactivate = ->
-  inspection.destroy() for inspection in @inspections
+  begin: (sessionLength) ->
+    @sessionStart = Date.now()
 
-plugin.serialize = ->
-  JSON.stringify(@state)
+    Reporter.sendEvent('inspector', 'ended', sessionLength) if sessionLength
+    Reporter.sendEvent('inspector', 'started')
+
+  getUserId: (callback) ->
+    require('getmac').getMac (error, macAddress) =>
+      if error?
+        callback require('node-uuid').v4()
+      else
+        callback crypto.createHash('sha1').update(macAddress, 'utf8').digest('hex')
+
+  deactivate: ->
+    inspection.destroy() for inspection in @inspections
+    @scopeInspectorView.destroy()
+    @scopePathView.destroy()
+
+
+  serialize: ->
+    sidebarWidth: @scopeInspectorView.width()
+    sessionLength: Date.now() - @sessionStart
+
+
+module.exports = new ScopeInspector()
