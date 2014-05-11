@@ -23,7 +23,7 @@ class ScopeInspectorView extends ScrollView
     @detach()
 
   toggle: ->
-    atom.config.set 'scope-inspector.showSidebar', not atom.config.get 'scope-inspector.showSidebar'
+    atom.config.toggle 'scope-inspector.showSidebar'
 
   onToggle: ->
     console.log "Sidebar was toggled!"

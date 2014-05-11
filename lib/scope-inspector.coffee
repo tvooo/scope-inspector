@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Subscriber = require('emissary').Subscriber
+#Subscriber = require('emissary').Subscriber
 Inspection = require './inspection'
 ScopeInspectorView = require './scope-inspector-view'
 ScopePathView = require './scope-path-view'
@@ -25,7 +25,6 @@ crypto = require 'crypto'
 # - Turn off syntax highlighting, turn on scope highlighting
 
 class ScopeInspector
-  Subscriber.extend @
 
   constructor: ->
     @inspections = []
@@ -41,7 +40,6 @@ class ScopeInspector
 
   updateInspection: (editorView) ->
     editor = editorView.getEditor();
-    #console.log editor.getGrammar().name
     if editor.getGrammar().name isnt 'JavaScript'
       return
 
@@ -50,14 +48,13 @@ class ScopeInspector
     editor.inspection = inspection
 
   configDefaults:
-    highlightScopeInEditor: false
     highlightGlobalScope: false
     showSidebar: true
     trackUsageMetrics: false
-    userId: null
+    userId: ""
 
   activate: (@state) ->
-    console.log "Deserializing state ", @state
+    #console.log "Deserializing state ", @state
     @scopeInspectorView ?= new ScopeInspectorView(@)
     @scopePathView ?= new ScopePathView(@)
     @scopePathView.registerAdditionalEvents()
@@ -65,16 +62,14 @@ class ScopeInspector
     @registerInspections.call(this)
     @scopeInspectorView.onToggle()
     if atom.config.get('scope-inspector.userId')
-      @begin(@state.sessionLength)
+      @begin(@state?.sessionLength)
     else
       @getUserId (userId) -> atom.config.set('scope-inspector.userId', userId)
-      @begin(@state.sessionLength)
+      @begin(@state?.sessionLength)
     atom.config.observe 'scope-inspector.showSidebar', ->
       Reporter.sendEvent('showSidebar', if atom.config.get 'scope-inspector.showSidebar' then 'enabled' else 'disabled')
     atom.config.observe 'scope-inspector.highlightGlobalScope', ->
       Reporter.sendEvent('highlightGlobalScope', if atom.config.get 'scope-inspector.highlightGlobalScope' then 'enabled' else 'disabled')
-    atom.config.observe 'scope-inspector.highlightScopeInEditor', ->
-      Reporter.sendEvent('highlightScopeInEditor', if atom.config.get 'scope-inspector.highlightScopeInEditor' then 'enabled' else 'disabled')
 
   onPaneChanged: ->
     editor = atom.workspace.getActiveEditor()
@@ -87,7 +82,6 @@ class ScopeInspector
       @scopePathView.hide()
     else
       @activeInspection = editor.inspection
-      #@scopeInspectorView.onToggle()
       @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'
       @scopePathView.show()
 
@@ -106,9 +100,9 @@ class ScopeInspector
 
   deactivate: ->
     inspection.destroy() for inspection in @inspections
+    @inspections = []
     @scopeInspectorView.destroy()
     @scopePathView.destroy()
-
 
   serialize: ->
     sidebarWidth: @scopeInspectorView.width()

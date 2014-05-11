@@ -1,4 +1,22 @@
-if(3){}
+if(3){
+  
+}else if(4){
+
+}else{
+
+}
+
+while(true){}
+
+for(var x; ; ) {}
+
+switch(a) {
+case 1:
+  break;
+case 2:
+  break;
+default: break;
+}
 
 var eineDefinition = 4;
 

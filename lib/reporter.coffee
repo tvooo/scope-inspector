@@ -12,7 +12,7 @@ module.exports =
         t: 'event'
         ec: category
         ea: name
-        ev: value
+        ev: value ? 0
 
       @send(params)
 

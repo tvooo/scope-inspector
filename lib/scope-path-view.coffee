@@ -19,7 +19,8 @@ class ScopePathView extends View
     atom.config.observe 'scope-inspector.showSidebar', =>
       @btnToggleSidebar[if atom.config.get 'scope-inspector.showSidebar' then 'addClass' else 'removeClass']('selected')
     atom.config.observe 'scope-inspector.highlightGlobalScope', =>
-      @btnToggleHighlightGlobal[if atom.config.get 'scope-inspector:highlightGlobalScope' then 'addClass' else 'removeClass']('selected')
+      @btnToggleHighlightGlobal[if atom.config.get 'scope-inspector.highlightGlobalScope' then 'addClass' else 'removeClass']('selected')
+    console.log atom.config
 
   # Tear down any state and detach
   destroy: ->
@@ -38,7 +39,7 @@ class ScopePathView extends View
       @panelWrapper.append "<div class='text-subtle'>Parsing error</div>"
 
   toggleHighlightGlobal: (event, element) ->
-    atom.config.set 'scope-inspector.highlightGlobalScope', not atom.config.get 'scope-inspector.highlightGlobalScope'
+    atom.config.toggle 'scope-inspector.highlightGlobalScope'
 
   toggleSidebar: (event, element) ->
     @plugin.scopeInspectorView.toggle()

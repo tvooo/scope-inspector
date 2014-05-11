@@ -5,10 +5,11 @@ require('fs').readFile('test.js', function(err, data) {
 
   syntax = require('./parser').getScopeTree(data.toString());
 
-  console.log("-----------" + syntax.name, syntax.parentScope);
-  printScope( syntax );
+  //console.log("-----------" + syntax.name, syntax.parentScope);
+  //printScope( syntax );
+  console.log(syntax.node.body[3].cases);
 
-  console.log( syntax.node )
+  //console.log( syntax.node.body[1] )
 
   //console.log(syntax.getIdentifier('updateStatusbar').getIdentifier('test2').params)
   //console.log(JSON.stringify(syntax.node.body[3],null,"  "))

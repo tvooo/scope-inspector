@@ -29,6 +29,13 @@ class Inspection
     @updateMarkers()
     @onSaved()
 
+  destroy: ->
+    for marker in @markers
+      marker.highlightView.destroy()
+      marker.destroy()
+    @markers = []
+    @editor.inspection = null
+
   registerEvents: ->
     console.log "Registering ALL the events!"
     @editor.buffer.on('saved', _.debounce(@onSaved.bind(this), 50));
@@ -59,8 +66,6 @@ class Inspection
 
       @markers.push marker
 
-
-
   onCursorMoved: ->
     cursor = @editor.getCursor()
     scope = if @scopeTree then getContainingScope( cursor, @scopeTree ) else null
@@ -73,7 +78,7 @@ class Inspection
     @plugin.scopeInspectorView?.renderScope( scopePath )
     @plugin.scopePathView?.renderScope( scopePath )
     @updateHighlights()
-    
+
     return unless scopePath?
     @hoistingView = new HoistingView( @ )
     @hoistingView.render( scope )
