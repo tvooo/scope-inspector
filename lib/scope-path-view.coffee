@@ -8,8 +8,8 @@ class ScopePathView extends View
       @div class: 'inset-panel padded', =>
         @div class: 'btn-group scope-path-buttons', outlet: 'panelWrapper'
         @div class: 'btn-group scope-options', =>
-          @button class: "btn btn-sm #{'selected' if atom.config.get 'scope-inspector.highlightGlobalScope'}", outlet: 'btnToggleHighlightGlobal', click: 'toggleHighlightGlobal','Highlight Global'
-          @button class: "btn btn-sm #{'selected' if atom.config.get 'scope-inspector.showSidebar'} icon icon-list-unordered", outlet: 'btnToggleSidebar', click: 'toggleSidebar'
+          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.highlightGlobalScope'}", outlet: 'btnToggleHighlightGlobal', click: 'toggleHighlightGlobal','Highlight Global'
+          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.showSidebar'} icon icon-list-unordered", outlet: 'btnToggleSidebar', click: 'toggleSidebar'
 
 
   initialize: (@plugin) ->
@@ -30,7 +30,7 @@ class ScopePathView extends View
     @panelWrapper.empty()
     if scopePath?
       for scope in scopePath.reverse()
-        button = $ "<button class='btn btn-sm'>#{scope.name}</button>"
+        button = $ "<button class='btn'>#{scope.name}</button>"
         button.on 'click', @onClickButton.bind(this, scope)
         button.on 'mouseover', @onEnterButton.bind(this, scope)
         button.on 'mouseout', @onLeaveButton.bind(this)
@@ -40,16 +40,19 @@ class ScopePathView extends View
 
   toggleHighlightGlobal: (event, element) ->
     atom.config.toggle 'scope-inspector.highlightGlobalScope'
+    @btnToggleHighlightGlobal.blur()
 
   toggleSidebar: (event, element) ->
     @plugin.scopeInspectorView.toggle()
+    @btnToggleSidebar.blur()
 
   onEnterButton: (scope, event) ->
     Reporter.sendEvent('path-button', 'hover')
     @plugin.activeInspection.focusScope(scope)
 
   onLeaveButton: ->
-    @plugin.activeInspection.onCursorMoved()
+    #@plugin.activeInspection.onCursorMoved()
+    @plugin.activeInspection.focusScope(null)
 
   onClickButton: (scope, event) ->
     Reporter.sendEvent('path-button', 'click')

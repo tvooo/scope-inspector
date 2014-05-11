@@ -1,5 +1,5 @@
 if(3){
-  
+
 }else if(4){
 
 }else{
@@ -112,6 +112,7 @@ function lint() {
 
       ret[l] = _.sortBy(ret[l], function (el) {
         return el.character;
+        var result;
       });
     } else {
       ret[l] = [el];

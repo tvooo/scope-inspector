@@ -67,8 +67,10 @@ class Inspection
       @markers.push marker
 
   onCursorMoved: ->
+    console.log "onCursorMoved"
     cursor = @editor.getCursor()
-    scope = if @scopeTree then getContainingScope( cursor, @scopeTree ) else null
+    scope = if @scopeTree? then getContainingScope( cursor, @scopeTree ) else null
+    console.log scope
     return unless scope != @scope
 
     @hoistingView?.destroy()
@@ -85,8 +87,8 @@ class Inspection
 
   focusScope: (scope) ->
     return unless scope != @scope
-    @scope = scope
-    @updateHighlightsFast()
+    #@scope = scope
+    @updateHighlightsFast(scope)
 
   updateHighlights: ->
     for marker in @markers
@@ -95,12 +97,12 @@ class Inspection
       else
         marker.highlightView.hideHighlight()
 
-  updateHighlightsFast: ->
+  updateHighlightsFast: (scope) ->
     for marker in @markers
-      if @scope == marker.scope and (marker.scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobalScope')
+      if scope == marker.scope
         marker.highlightView.showHighlightImmediately()
       else
-        marker.highlightView.hideHighlightImmediately()
+        marker.highlightView.hideHighlightImmediately() unless marker.scope == @scope
 
   onSaved: ->
     # Update scopeTree
