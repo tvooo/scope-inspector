@@ -2,7 +2,7 @@
 
 View your JavaScript code from a different perspective. Explore nested scopes and detect variable shadowing and hoisting.
 
-![Scope Inspector](img/scope-inspector.gif)
+![Scope Inspector](scope-inspector.gif)
 
 ## This is heavy work-in-progress stuff
 
@@ -37,9 +37,9 @@ Here's what is going to be tracked:
 ### Inline
 
 - Highlight current scope
-  ![Highlight current scope](img/scope-highlight.png)
+  ![Highlight current scope](scope-highlight.png)
 - Indicate hoisted variables
-  ![Indicate hoisted variables](img/hoisting.png)
+  ![Indicate hoisted variables](hoisting.png)
 
 ### Scope Inspector (bottom bar)
 
@@ -49,12 +49,12 @@ Here's what is going to be tracked:
 
 ### Sidebar
 
-![Sidebar](img/sidebar.png)
+![Sidebar](sidebar.png)
 
 - List parameters, variables and nested functions of the current and all surrounding scopes (closest is on top, furthest [global scope] on the bottom)
 - Indicate if an identifier will be hoisted  
-  ![Hosting indicator](img/hoisted.png)
+  ![Hosting indicator](hoisted.png)
 - Indicate if an identifier shadows another identifier (with the same name, in a surrounding scope)  
-  ![Shadowing](img/shadowing.png)
+  ![Shadowing](shadowing.png)
 - Indicate if an identifier is shadowed  
-  ![Shadowed](img/shadowed.png)
+  ![Shadowed](shadowed.png)
