@@ -14,7 +14,11 @@ Don't expect it to work perfectly, especially when it comes to parsing and analy
 
 `$ apm install scope-inspector`
 
-## Metrics & Feedback
+## Default keyboard shortcuts
+
+`ctrl+alt+i` toggles the sidebar
+
+## Metrics & feedback
 
 This is **disabled** by default.
 
@@ -36,10 +40,13 @@ Here's what is going to be tracked:
 
 ### Inline
 
-- Highlight current scope
-  ![Highlight current scope](https://raw.githubusercontent.com/tvooo/scope-inspector/master/scope-highlight.png)
-- Indicate hoisted variables
-  ![Indicate hoisted variables](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisting.png)
+#### Highlight current scope
+
+![Highlight current scope](https://raw.githubusercontent.com/tvooo/scope-inspector/master/scope-highlight.png)
+
+#### Indicate hoisted variables
+
+![Indicate hoisted variables](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisting.png)
 
 ### Scope Inspector (bottom bar)
 
@@ -51,10 +58,16 @@ Here's what is going to be tracked:
 
 ![Sidebar](https://raw.githubusercontent.com/tvooo/scope-inspector/master/sidebar.png)
 
-- List parameters, variables and nested functions of the current and all surrounding scopes (closest is on top, furthest [global scope] on the bottom)
-- Indicate if an identifier will be hoisted  
-  ![Hosting indicator](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisted.png)
-- Indicate if an identifier shadows another identifier (with the same name, in a surrounding scope)  
-  ![Shadowing](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowing.png)
-- Indicate if an identifier is shadowed  
-  ![Shadowed](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowed.png)
+List parameters, variables and nested functions of the current and all surrounding scopes (closest is on top, furthest [global scope] on the bottom)
+
+#### Indicate if an identifier will be hoisted  
+
+![Hosting indicator](https://raw.githubusercontent.com/tvooo/scope-inspector/master/hoisted.png)
+
+#### Indicate if an identifier shadows another identifier (with the same name, in a surrounding scope)  
+
+![Shadowing](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowing.png)
+
+#### Indicate if an identifier is shadowed  
+
+![Shadowed](https://raw.githubusercontent.com/tvooo/scope-inspector/master/shadowed.png)
