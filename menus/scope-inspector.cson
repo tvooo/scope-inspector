@@ -9,7 +9,10 @@
     'submenu': [
       'label': 'scope-inspector'
       'submenu': [
-        { 'label': 'Toggle Sidebar', 'command': 'scope-inspector:toggle' }
+        { 'label': 'Toggle Sidebar', 'command': 'scope-inspector:toggle-sidebar' },
+        { 'label': 'Toggle Highlighting', 'command': 'scope-inspector:toggle-highlighting' },
+        { 'label': 'Toggle Breadcrumbs', 'command': 'scope-inspector:toggle-breadcrumbs' },
+        { 'label': 'Toggle Hoisting Indicators', 'command': 'scope-inspector:toggle-hoisting-indicators' }
       ]
     ]
   }

@@ -7,23 +7,24 @@ class ScopePathView extends View
     @div class: 'scope-path tool-panel panel-bottom', =>
       @div class: 'inset-panel padded', =>
         @div class: 'btn-group scope-path-buttons', outlet: 'panelWrapper'
-        @div class: 'btn-group scope-options', =>
-          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.highlightGlobalScope'}", outlet: 'btnToggleHighlightGlobal', click: 'toggleHighlightGlobal','Highlight Global'
-          @button class: "btn #{'selected' if atom.config.get 'scope-inspector.showSidebar'} icon icon-list-unordered", outlet: 'btnToggleSidebar', click: 'toggleSidebar'
-
 
   initialize: (@plugin) ->
-    atom.workspaceView.appendToBottom(this)
+    atom.workspaceView.appendToBottom @
+    @onToggle()
 
   registerAdditionalEvents: ->
-    atom.config.observe 'scope-inspector.showSidebar', =>
-      @btnToggleSidebar[if atom.config.get 'scope-inspector.showSidebar' then 'addClass' else 'removeClass']('selected')
-    atom.config.observe 'scope-inspector.highlightGlobalScope', =>
-      @btnToggleHighlightGlobal[if atom.config.get 'scope-inspector.highlightGlobalScope' then 'addClass' else 'removeClass']('selected')
+    atom.config.observe 'scope-inspector.showBreadcrumbs', =>
+      @onToggle()
 
   # Tear down any state and detach
   destroy: ->
     @detach()
+
+  onToggle: ->
+    if atom.config.get 'scope-inspector.showBreadcrumbs'
+      @show()
+    else
+      @hide()
 
   renderScope: (scopePath) ->
     @panelWrapper.empty()
@@ -37,20 +38,11 @@ class ScopePathView extends View
     else
       @panelWrapper.append "<div class='text-subtle'>Parsing error</div>"
 
-  toggleHighlightGlobal: (event, element) ->
-    atom.config.toggle 'scope-inspector.highlightGlobalScope'
-    @btnToggleHighlightGlobal.blur()
-
-  toggleSidebar: (event, element) ->
-    @plugin.scopeInspectorView.toggle()
-    @btnToggleSidebar.blur()
-
   onEnterButton: (scope, event) ->
     Reporter.sendEvent('path-button', 'hover')
     @plugin.activeInspection.focusScope(scope)
 
   onLeaveButton: ->
-    #@plugin.activeInspection.onCursorMoved()
     @plugin.activeInspection.focusScope(null)
 
   onClickButton: (scope, event) ->

@@ -9,7 +9,7 @@ crypto = require 'crypto'
 # Strategy
 #
 # - Attach one Inspection instance to each .js editor, saving the state, parse tree and managing views and events
-# - one InspectorView and one PathView in total
+# - one InspectorView and one PathView in total (well, per workspaceView)
 # - For each scope, a marker is set from beginning to end of scope
 # - For each marker, a view is created, but not rendered
 # - This view renders if scope is in focus. if there are no child scopes, it's easy, otherwise it's more tricky. but manage it via markers!
@@ -68,16 +68,21 @@ class ScopeInspector
       Reporter.sendEvent('showSidebar', if atom.config.get 'scope-inspector.showSidebar' then 'enabled' else 'disabled')
     atom.config.observe 'scope-inspector.highlightGlobalScope', ->
       Reporter.sendEvent('highlightGlobalScope', if atom.config.get 'scope-inspector.highlightGlobalScope' then 'enabled' else 'disabled')
+    atom.config.observe 'scope-inspector.showBreadcrumbs', ->
+      Reporter.sendEvent('showBreadcrumbs', if atom.config.get 'scope-inspector.showBreadcrumbs' then 'enabled' else 'disabled')
+    atom.config.observe 'scope-inspector.showHoistingIndicators', ->
+      Reporter.sendEvent('showHoistingIndicators', if atom.config.get 'scope-inspector.showBreadcrumbs' then 'enabled' else 'disabled')
+
 
   onPaneChanged: ->
     editor = atom.workspace.getActiveEditor()
     if not editor
-      @scopeInspectorView.hide()
-      @scopePathView.hide()
+      @scopeInspectorView?.hide()
+      @scopePathView?.hide()
       return
     if editor.getGrammar().name isnt 'JavaScript'
-      @scopeInspectorView.hide()
-      @scopePathView.hide()
+      @scopeInspectorView?.hide()
+      @scopePathView?.hide()
     else
       @activeInspection = editor.inspection
       @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'

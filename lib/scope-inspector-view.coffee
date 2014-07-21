@@ -12,6 +12,9 @@ class ScopeInspectorView extends ScrollView
   initialize: (@plugin) ->
     super()
     atom.workspaceView.command "scope-inspector:toggle-sidebar", => @toggle()
+    atom.workspaceView.command "scope-inspector:toggle-highlighting", => @toggleHighlighting()
+    atom.workspaceView.command "scope-inspector:toggle-breadcrumbs", => @toggleBreadcrumbs()
+    atom.workspaceView.command "scope-inspector:toggle-hoisting-indicators", => @toggleHoisting()
     atom.workspaceView.appendToRight(this)
     atom.config.observe 'scope-inspector.showSidebar', => @onToggle()
     @on 'mousedown', '.scope-inspector-resize-handle', (e) => @resizeStarted(e)
@@ -25,12 +28,25 @@ class ScopeInspectorView extends ScrollView
   toggle: ->
     atom.config.toggle 'scope-inspector.showSidebar'
 
+  toggleHighlighting: ->
+    atom.config.toggle 'scope-inspector.highlightCurrentScope'
+
+  toggleBreadcrumbs: ->
+    atom.config.toggle 'scope-inspector.showBreadcrumbs'
+
+  toggleHoisting: ->
+    atom.config.toggle 'scope-inspector.showHoistingIndicators'
+
   onToggle: ->
-    if atom.config.get('scope-inspector.showSidebar') and not @hasParent()
-      atom.workspaceView.appendToRight @
-      @plugin.onPaneChanged()
+    #if atom.config.get('scope-inspector.showSidebar') and not @hasParent()
+    #  atom.workspaceView.appendToRight @
+    #  @plugin.onPaneChanged()
+    #else
+    #  @detach()
+    if atom.config.get 'scope-inspector.showSidebar'
+      @show()
     else
-      @detach()
+      @hide()
 
   renderScope: (scopes) ->
     @panelWrapper.empty()
