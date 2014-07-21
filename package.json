@@ -1,7 +1,7 @@
 {
   "name": "scope-inspector",
   "main": "./lib/scope-inspector",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "author": "Tim von Oldenburg <tim@tvooo.de>",
   "description": "Inspect and explore JavaScript scope.",
   "activationEvents": [],
