@@ -1,5 +1,3 @@
-HighlightView = require './scope-highlight-view'
-HoistingView = require './hoisting-view'
 parser = require './parser'
 {Range} = require 'atom'
 _ = require 'lodash'
@@ -25,7 +23,7 @@ class Inspection
     @editor = @editorView.getEditor()
     @markers = []
     @registerEvents()
-    @updateMarkers()
+    #@updateMarkers()
     @onSaved()
 
   destroy: ->
@@ -41,7 +39,7 @@ class Inspection
 
   updateMarkers: ->
     for marker in @markers
-      marker.highlightView.destroy()
+      marker.highlightView?.destroy()
       marker.destroy()
 
     @markers = []
@@ -56,11 +54,10 @@ class Inspection
         [loc.start.line-1, loc.start.column],
         [loc.end.line-1, loc.end.column]
       )
-      marker = @editor.markBufferRange(range).bufferMarker
+      marker = @editor.markBufferRange(range)#.bufferMarker
       marker.scope = scope
-      marker.highlightView = new HighlightView(@editorView, marker)
-      marker.highlightView.render()
-      marker.on 'changed', (event) =>
+      marker.decoration = @editor.decorateMarker(marker, {type: 'highlight', class: 'scope-highlight'})
+      console.log marker.decoration
 
       @markers.push marker
 
@@ -69,7 +66,7 @@ class Inspection
     scope = if @scopeTree? then getContainingScope( cursor, @scopeTree ) else null
     return unless scope != @scope
 
-    @hoistingView?.destroy()
+    @hoistingMarker?.destroy()
     @scope = scope
     scopePath = if @scope? then parser.getNestedScopes( @scope ) else null
 
@@ -78,27 +75,35 @@ class Inspection
     @updateHighlights()
 
     return unless scopePath?
-    @hoistingView = new HoistingView( @ )
-    @hoistingView.render( scope )
+    hoistedIdentifiers = scope.getHoistedIdentifiers()
+    return unless hoistedIdentifiers.length
+
+    range = new Range(
+      [scope.hoistingPosition.start.line-1, scope.hoistingPosition.start.column],
+      [scope.hoistingPosition.start.line-1, scope.hoistingPosition.start.column + 100]
+    )
+
+    @hoistingMarker = marker = @editor.markBufferRange(range).bufferMarker
+    @hoistingMarker.decoration = @editor.decorateMarker(marker, {type: 'highlight', class: 'hoisting'})
 
   focusScope: (scope) ->
     return unless scope != @scope
-    #@scope = scope
     @updateHighlightsFast(scope)
 
   updateHighlights: ->
     for marker in @markers
       if @scope == marker.scope and (marker.scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobalScope')
-        marker.highlightView.showHighlight()
+        marker.decoration.update({type: 'highlight', class: 'scope-highlight active'})
       else
-        marker.highlightView.hideHighlight()
+        marker.decoration.update({type: 'highlight', class: 'scope-highlight'})
 
   updateHighlightsFast: (scope) ->
+    #return
     for marker in @markers
       if scope == marker.scope
-        marker.highlightView.showHighlightImmediately()
+        marker.decoration.update({type: 'highlight', class: 'scope-highlight active'})
       else
-        marker.highlightView.hideHighlightImmediately() unless marker.scope == @scope
+        marker.decoration.update({type: 'highlight', class: 'scope-highlight'}) unless marker.scope == @scope
 
   onSaved: ->
     # Update scopeTree

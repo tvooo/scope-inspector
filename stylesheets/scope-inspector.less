@@ -44,12 +44,6 @@
   }
 }
 
-.scope-highlight {
-  position: absolute;
-  //background: #333;
-  background: @background-color-highlight;
-}
-
 .scope-path {
   .inset-panel {
     overflow: auto;
@@ -62,33 +56,32 @@
   }
 }
 
-.violation {
-    position: absolute;
-  }
+.scope-highlight .region {
+  background-color: transparent;
+  -webkit-transition: background-color .3s ease;
+  transition: background-color .3s ease;
+}
 
-  .violation-arrow {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 10px;
-    height: 10px;
-    border-style: solid;
-    border-color: transparent;
-    border-width: 5px 5px 0 5px;
-    border-top-color: @text-color-warning;
+.scope-highlight.active .region {
+  background-color: @background-color-highlight;
+  -webkit-transition: background-color .3s ease;
+  transition: background-color .3s ease;
+}
 
-  }
-  .violation-area {
-    position: absolute;
-    top: 0;
-  }
+.hoisting .region {
+  border-top: 1px @text-color-warning dotted;
+}
 
-  .violation-border {
-    position: absolute;
-    border-bottom-style: dotted;
-    border-bottom-width: 1px;
-    border-bottom-color: @text-color-warning;
-    top: 0;
-    left: 10px;
-    right: 0;
-  }
+.hoisting .region:before {
+  content: " ";
+  color: transparent;
+  position: absolute;
+  left: -5px;
+  top: -1px;
+  width: 10px;
+  height: 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 5px 5px 0 5px;
+  border-top-color: @text-color-warning;
+}
