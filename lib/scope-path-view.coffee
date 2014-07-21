@@ -6,7 +6,7 @@ class ScopePathView extends View
   @content: (plugin) ->
     @div class: 'scope-path tool-panel panel-bottom', =>
       @div class: 'inset-panel padded', =>
-        @div class: 'btn-group scope-path-buttons', outlet: 'panelWrapper'
+        @div class: 'scope-path-buttons', outlet: 'panelWrapper'
 
   initialize: (@plugin) ->
     atom.workspaceView.appendToBottom @
@@ -16,7 +16,6 @@ class ScopePathView extends View
     atom.config.observe 'scope-inspector.showBreadcrumbs', =>
       @onToggle()
 
-  # Tear down any state and detach
   destroy: ->
     @detach()
 
@@ -29,8 +28,10 @@ class ScopePathView extends View
   renderScope: (scopePath) ->
     @panelWrapper.empty()
     if scopePath?
-      for scope in scopePath.reverse()
-        button = $ "<button class='btn'>#{scope.name}</button>"
+      for scope, i in scopePath.reverse()
+        button = $ "<div class='scope-breadcrumb'><span class='scope-breadcrumb-text'>#{scope.name}</span></div>"
+        if i < scopePath.length-1
+          button.append "<i class='icon icon-chevron-right'></i>"
         button.on 'click', @onClickButton.bind(this, scope)
         button.on 'mouseover', @onEnterButton.bind(this, scope)
         button.on 'mouseout', @onLeaveButton.bind(this)

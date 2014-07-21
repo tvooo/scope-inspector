@@ -8,7 +8,7 @@
   "repository": "https://github.com/tvooo/scope-inspector",
   "license": "MIT",
   "engines": {
-    "atom": ">0.90.0"
+    "atom": ">0.115.0"
   },
   "dependencies": {
     "esprima": "^1.2.1",
