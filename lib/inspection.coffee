@@ -22,13 +22,9 @@ class Inspection
   constructor: (@editorView, @plugin) ->
     @editor = @editorView.getEditor()
     @markers = []
-    @registerEvents()
-    #@updateMarkers()
+
     @onSaved()
-    atom.config.observe "scope-inspector.highlightCurrentScope", =>
-      @updateHighlights()
-    atom.config.observe "scope-inspector.showHoistingIndicators", =>
-      @updateHoistingIndicators()
+    @registerEvents()
 
   destroy: ->
     for marker in @markers
@@ -38,8 +34,24 @@ class Inspection
     @editor.inspection = null
 
   registerEvents: ->
-    @editor.buffer.on('saved', _.debounce(@onSaved.bind(this), 50));
-    @editorView.on('cursor:moved', _.debounce(@onCursorMoved.bind(this), 50));
+    @editor.buffer.on('saved', _.debounce(@onSaved.bind(this), 50))
+    @editorView.on('cursor:moved', _.debounce(@onCursorMoved.bind(this), 50))
+
+    atom.config.observe "scope-inspector.highlightCurrentScope", =>
+      @updateHighlights()
+    atom.config.observe "scope-inspector.showHoistingIndicators", =>
+      @updateHoistingIndicators()
+    atom.config.observe "scope-inspector.evaluateOnlyOnSave", =>
+      @updateEvents()
+    atom.config.observe "scope-inspector.evaluationDelay", =>
+      @updateEvents()
+
+  updateEvents: ->
+    @evaluationSubscription?.off()
+
+    delay = atom.config.get "scope-inspector.evaluationDelay"
+    if not atom.config.get "scope-inspector.evaluateOnlyOnSave"
+      @evaluationSubscription = @editor.buffer.on('contents-modified', _.debounce(@onSaved.bind(@), delay))
 
   updateMarkers: ->
     for marker in @markers
@@ -124,5 +136,4 @@ class Inspection
       @scopeTree = null
 
     @updateMarkers()
-
     @onCursorMoved()

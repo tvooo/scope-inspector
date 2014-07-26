@@ -1,31 +1,10 @@
-_ = require 'lodash'
-#Subscriber = require('emissary').Subscriber
 Inspection = require './inspection'
 ScopeInspectorView = require './scope-inspector-view'
 ScopePathView = require './scope-path-view'
 Reporter = require './reporter'
 crypto = require 'crypto'
 
-# Strategy
-#
-# - Attach one Inspection instance to each .js editor, saving the state, parse tree and managing views and events
-# - one InspectorView and one PathView in total (well, per workspaceView)
-# - For each scope, a marker is set from beginning to end of scope
-# - For each marker, a view is created, but not rendered
-# - This view renders if scope is in focus. if there are no child scopes, it's easy, otherwise it's more tricky. but manage it via markers!
-# - Inspection events
-#   * buffer-changed: update parse tree; new parse tree fires event to update views
-#   * cursor-changed: check if scope changed; if yes, update scope path, fire event to update views
-#   * active editor changes: if JS, show InspectorView and PathView, and update it
-# Options for:
-# - Highlight is exclusive/inclusive
-# - Highlight parents in different shades
-# - Disable highlight for GLOBAL
-# - Show sidebar (pathbar is always shown?)
-# - Turn off syntax highlighting, turn on scope highlighting
-
 class ScopeInspector
-
   constructor: ->
     @inspections = []
     @activeInspection = null
@@ -49,7 +28,11 @@ class ScopeInspector
   configDefaults:
     highlightGlobalScope: false
     showSidebar: true
-    trackUsageMetrics: false
+    showBreadcrumbs: true
+    showHoistingIndicators: true
+    evaluationDelay: 200
+    evaluateOnlyOnSave: false
+    trackUsageMetrics: true
     userId: ""
 
   activate: (@state) ->
@@ -71,8 +54,7 @@ class ScopeInspector
     atom.config.observe 'scope-inspector.showBreadcrumbs', ->
       Reporter.sendEvent('showBreadcrumbs', if atom.config.get 'scope-inspector.showBreadcrumbs' then 'enabled' else 'disabled')
     atom.config.observe 'scope-inspector.showHoistingIndicators', ->
-      Reporter.sendEvent('showHoistingIndicators', if atom.config.get 'scope-inspector.showBreadcrumbs' then 'enabled' else 'disabled')
-
+      Reporter.sendEvent('showHoistingIndicators', if atom.config.get 'scope-inspector.showHoistingIndicators' then 'enabled' else 'disabled')
 
   onPaneChanged: ->
     editor = atom.workspace.getActiveEditor()
@@ -86,7 +68,7 @@ class ScopeInspector
     else
       @activeInspection = editor.inspection
       @scopeInspectorView.show() if atom.config.get 'scope-inspector.showSidebar'
-      @scopePathView.show()
+      @scopePathView.show() if atom.config.get 'scope-inspector.showBreadcrumbs'
 
   begin: (sessionLength) ->
     @sessionStart = Date.now()
@@ -110,6 +92,5 @@ class ScopeInspector
   serialize: ->
     sidebarWidth: @scopeInspectorView.width()
     sessionLength: Date.now() - @sessionStart
-
 
 module.exports = new ScopeInspector()
