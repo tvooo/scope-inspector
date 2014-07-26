@@ -22,6 +22,7 @@
   font-family: Source Code Pro, Consolas, monospace;
 
   li {
+    cursor: pointer;
     .argument {
       float: right;
 
@@ -41,6 +42,18 @@
   .is-shadowed {
     color: @text-color-subtle !important;
     text-decoration: line-through;
+  }
+
+  li.empty {
+    cursor: default;
+  }
+
+  li.empty:hover {
+    background: transparent
+  }
+
+  li:hover {
+    background: @background-color-highlight;
   }
 }
 

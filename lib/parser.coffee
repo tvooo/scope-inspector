@@ -25,12 +25,14 @@ class Variable
   constructor: (@node, @parentScope) ->
     @type = @node.type
     @name = @node.id.name
+    @loc = @node.loc
     @shadowedBy = []
     @hoisted = false
 
 class Parameter
   constructor: (@node, @parentScope) ->
     @name = @node.name
+    @loc = @node.loc
     @shadowedBy = []
 
 class Scope

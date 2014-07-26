@@ -1,6 +1,6 @@
 {$, $$, View, ScrollView} = require 'atom'
 ScopeView = require './scope-view-single'
-_ = require 'lodash'
+Reporter = require './reporter'
 
 module.exports =
 class ScopeInspectorView extends ScrollView
@@ -18,6 +18,7 @@ class ScopeInspectorView extends ScrollView
     atom.workspaceView.appendToRight(this)
     atom.config.observe 'scope-inspector.showSidebar', => @onToggle()
     @on 'mousedown', '.scope-inspector-resize-handle', (e) => @resizeStarted(e)
+    @on 'click', '[data-line]', (e) => @onClickIdentifier(e)
     @width(@plugin.state.sidebarWidth)
     @subviews = []
 
@@ -47,6 +48,17 @@ class ScopeInspectorView extends ScrollView
       @show()
     else
       @hide()
+
+  onClickIdentifier: (e) ->
+    #console.log(e)
+    el = $ e.currentTarget
+    #console.log el
+    line = parseInt el.attr('data-line'), 10
+    column = parseInt el.attr('data-column'), 10
+    Reporter.sendEvent('identifier', 'click')
+    #loc = scope.loc.start
+    @plugin.activeInspection.editor.setCursorBufferPosition([line, column])
+    @plugin.activeInspection.editorView.focus()
 
   renderScope: (scopes) ->
     @panelWrapper.empty()
