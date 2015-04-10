@@ -127,6 +127,7 @@ class Inspection
 
   onSaved: ->
     # Update scopeTree
+    return unless @editor?
     js = @editor.getText()
     try
       @scopeTree = parser.getScopeTree( js )
