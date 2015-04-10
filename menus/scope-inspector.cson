@@ -1,7 +1,6 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
 'context-menu':
-  '.overlayer':
-      'Enable scope-inspector': 'scope-inspector:toggle'
+  'atom-workspace': [{label: 'Enable scope-inspector', command: 'scope-inspector:toggle'}]
 
 'menu': [
   {

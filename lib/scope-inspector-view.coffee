@@ -1,21 +1,23 @@
-{$, $$, View, ScrollView} = require 'atom'
+{$, $$, View, ScrollView} = require 'atom-space-pen-views'
 ScopeView = require './scope-view-single'
 Reporter = require './reporter'
 
 module.exports =
 class ScopeInspectorView extends ScrollView
   @content: ->
-    @div class: 'scope-inspector tool-panel panel-right', =>
+    @div class: 'scope-inspector', =>
       @div class: "scope-inspector-resize-handle"
       @div outlet: 'panelWrapper'
 
   initialize: (@plugin) ->
     super()
-    atom.workspaceView.command "scope-inspector:toggle-sidebar", => @toggle()
-    atom.workspaceView.command "scope-inspector:toggle-highlighting", => @toggleHighlighting()
-    atom.workspaceView.command "scope-inspector:toggle-breadcrumbs", => @toggleBreadcrumbs()
-    atom.workspaceView.command "scope-inspector:toggle-hoisting-indicators", => @toggleHoisting()
-    atom.workspaceView.appendToRight(this)
+    atom.commands.add 'atom-text-editor',
+      "scope-inspector:toggle-sidebar": => @toggle()
+      "scope-inspector:toggle-highlighting": => @toggleHighlighting()
+      "scope-inspector:toggle-breadcrumbs": => @toggleBreadcrumbs()
+      "scope-inspector:toggle-hoisting-indicators": => @toggleHoisting()
+    atom.workspace.addRightPanel
+      item: @
     atom.config.observe 'scope-inspector.showSidebar', => @onToggle()
     @on 'mousedown', '.scope-inspector-resize-handle', (e) => @resizeStarted(e)
     @on 'click', '[data-line]', (e) => @onClickIdentifier(e)
@@ -27,38 +29,30 @@ class ScopeInspectorView extends ScrollView
     @detach()
 
   toggle: ->
-    atom.config.toggle 'scope-inspector.showSidebar'
+    atom.config.set 'scope-inspector.showSidebar', not atom.config.get 'scope-inspector.showSidebar'
 
   toggleHighlighting: ->
-    atom.config.toggle 'scope-inspector.highlightCurrentScope'
+    atom.config.set 'scope-inspector.highlightCurrentScope', not atom.config.get 'scope-inspector.highlightCurrentScope'
 
   toggleBreadcrumbs: ->
-    atom.config.toggle 'scope-inspector.showBreadcrumbs'
+    atom.config.set 'scope-inspector.showBreadcrumbs', not atom.config.get 'scope-inspector.showBreadcrumbs'
 
   toggleHoisting: ->
-    atom.config.toggle 'scope-inspector.showHoistingIndicators'
+    atom.config.set 'scope-inspector.showHoistingIndicators', not atom.config.get 'scope-inspector.showHoistingIndicators'
 
   onToggle: ->
-    #if atom.config.get('scope-inspector.showSidebar') and not @hasParent()
-    #  atom.workspaceView.appendToRight @
-    #  @plugin.onPaneChanged()
-    #else
-    #  @detach()
     if atom.config.get 'scope-inspector.showSidebar'
       @show()
     else
       @hide()
 
   onClickIdentifier: (e) ->
-    #console.log(e)
     el = $ e.currentTarget
-    #console.log el
     line = parseInt el.attr('data-line'), 10
     column = parseInt el.attr('data-column'), 10
     Reporter.sendEvent('identifier', 'click')
-    #loc = scope.loc.start
     @plugin.activeInspection.editor.setCursorBufferPosition([line, column])
-    @plugin.activeInspection.editorView.focus()
+    #atom.views.get(@plugin.activeInspection.editor)?.focus()
 
   renderScope: (scopes) ->
     @panelWrapper.empty()

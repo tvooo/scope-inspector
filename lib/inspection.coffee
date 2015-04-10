@@ -19,10 +19,8 @@ getContainingScope = ( cursor, scope ) =>
 
 module.exports =
 class Inspection
-  constructor: (@editorView, @plugin) ->
-    @editor = @editorView.getEditor()
+  constructor: (@editor, @plugin) ->
     @markers = []
-
     @onSaved()
     @registerEvents()
 
@@ -34,8 +32,8 @@ class Inspection
     @editor.inspection = null
 
   registerEvents: ->
-    @editor.buffer.on('saved', _.debounce(@onSaved.bind(this), 50))
-    @editorView.on('cursor:moved', _.debounce(@onCursorMoved.bind(this), 50))
+    @editor.buffer.onDidSave(_.debounce(@onSaved.bind(this), 50))
+    @editor.onDidChangeCursorPosition(_.debounce(@onCursorMoved.bind(this), 50))
 
     atom.config.observe "scope-inspector.highlightCurrentScope", =>
       @updateHighlights()
@@ -47,11 +45,11 @@ class Inspection
       @updateEvents()
 
   updateEvents: ->
-    @evaluationSubscription?.off()
+    @evaluationSubscription?.dispose()
 
     delay = atom.config.get "scope-inspector.evaluationDelay"
     if not atom.config.get "scope-inspector.evaluateOnlyOnSave"
-      @evaluationSubscription = @editor.buffer.on('contents-modified', _.debounce(@onSaved.bind(@), delay))
+      @evaluationSubscription = @editor.buffer.onDidStopChanging(_.debounce(@onSaved.bind(@), delay))
 
   updateMarkers: ->
     for marker in @markers
@@ -77,7 +75,7 @@ class Inspection
       @markers.push marker
 
   onCursorMoved: ->
-    cursor = @editor.getCursor()
+    cursor = @editor.getLastCursor()
     scope = if @scopeTree? then getContainingScope( cursor, @scopeTree ) else null
     return unless scope != @scope
 
@@ -115,17 +113,17 @@ class Inspection
   updateHighlights: ->
     for marker in @markers
       if @scope == marker.scope and (marker.scope.parentScope? or atom.config.get 'scope-inspector.highlightGlobalScope') and atom.config.get "scope-inspector.highlightCurrentScope"
-        marker.decoration.update({type: 'highlight', class: 'scope-highlight active'})
+        marker.decoration.setProperties({type: 'highlight', class: 'scope-highlight active'})
       else
-        marker.decoration.update({type: 'highlight', class: 'scope-highlight'})
+        marker.decoration.setProperties({type: 'highlight', class: 'scope-highlight'})
 
   updateHighlightsFast: (scope) ->
     #return
     for marker in @markers
       if scope == marker.scope
-        marker.decoration.update({type: 'highlight', class: 'scope-highlight active'})
+        marker.decoration.setProperties({type: 'highlight', class: 'scope-highlight active'})
       else
-        marker.decoration.update({type: 'highlight', class: 'scope-highlight'}) unless marker.scope == @scope and atom.config.get "scope-inspector.highlightCurrentScope"
+        marker.decoration.setProperties({type: 'highlight', class: 'scope-highlight'}) unless marker.scope == @scope and atom.config.get "scope-inspector.highlightCurrentScope"
 
   onSaved: ->
     # Update scopeTree

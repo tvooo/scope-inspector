@@ -1,4 +1,4 @@
-{$, $$, View} = require 'atom'
+{$, $$, View} = require 'atom-space-pen-views'
 Reporter = require './reporter'
 
 module.exports =
@@ -9,7 +9,8 @@ class ScopePathView extends View
         @div class: 'scope-path-buttons', outlet: 'panelWrapper'
 
   initialize: (@plugin) ->
-    atom.workspaceView.appendToBottom @
+    atom.workspace.addBottomPanel
+      item: @
     @onToggle()
 
   registerAdditionalEvents: ->
@@ -50,4 +51,4 @@ class ScopePathView extends View
     Reporter.sendEvent('path-button', 'click')
     loc = scope.loc.start
     @plugin.activeInspection.editor.setCursorBufferPosition([loc.line-1, loc.column])
-    @plugin.activeInspection.editorView.focus()
+    atom.views.getView(@plugin.activeInspection.editor).focus()

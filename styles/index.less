@@ -79,30 +79,39 @@
   }
 }
 
-.scope-highlight .region {
+.scope-highlight .region,
+atom-text-editor::shadow .scope-highlight .region {
   background-color: transparent;
   -webkit-transition: background-color .3s ease;
   transition: background-color .3s ease;
 }
 
-.scope-highlight.active .region {
+.scope-highlight.active .region,
+atom-text-editor::shadow .scope-highlight.active .region {
   background-color: @background-color-highlight;
   -webkit-transition: background-color .3s ease;
   transition: background-color .3s ease;
 }
 
-.hoisting .region {
+.hoisting .region,
+atom-text-editor::shadow .hoisting .region {
   border-top: 1px @text-color-warning dotted;
 }
 
-.hoisting .region:before {
+.hoisting .region:before,
+atom-text-editor::shadow .hoisting .region:before {
   content: " ";
   color: transparent;
   position: absolute;
   left: -5px;
   top: -1px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
   width: 10px;
   height: 10px;
+  display: block;
   border-style: solid;
   border-color: transparent;
   border-width: 5px 5px 0 5px;

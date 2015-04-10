@@ -4,15 +4,16 @@
   "version": "0.2.1",
   "author": "Tim von Oldenburg <tim@tvooo.de>",
   "description": "Inspect and explore JavaScript scope.",
-  "activationEvents": [],
+  "activationCommands": [],
   "repository": "https://github.com/tvooo/scope-inspector",
   "license": "MIT",
   "engines": {
-    "atom": ">0.115.0"
+    "atom": ">=0.174.0 <2.0.0"
   },
   "dependencies": {
     "esprima": "^1.2.1",
     "lodash": "^2.4.1",
-    "getmac": "^1.0.6"
+    "getmac": "^1.0.6",
+    "atom-space-pen-views": "^2.0.3"
   }
 }
